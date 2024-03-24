@@ -1,6 +1,7 @@
 /app/static/
 /data/
 .env
+/base/
 
 # Django #
 *.log
