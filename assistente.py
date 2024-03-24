@@ -29,19 +29,19 @@ def retrieve_query(query):
     similar_responses = db.similarity_search(query, k=3)
     return [doc.page_content for doc in similar_responses]
 
-llm = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-16k-0613", temperature=1.1)
+llm = ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-16k-0613", temperature=0)
 
 template = """
 Você é um assistente virtual que trabalha no setor de suporte ao cliente de um
 software ERP chamado Simples Varejo.
 
-Aqui está a mensagem do cliente:
+Aqui está a mensagem com dúvida do cliente:
 {message}
 
-Aqui está uma documentação para basear a resposta:
+Aqui está uma documentação para se basear na resposta:
 {best_pratice}
 
-Caso a resposta não seja encontrada peça o cliente para entrar em conato com o suporte por telefone ou email.
+Caso a resposta não seja encontrada na documentação passada, peça o cliente para entrar em conato com o suporte por telefone ou email.
 
 Responda em portugues a melhor resposta para o cliente.
 """
