@@ -9,67 +9,67 @@ from langchain_community.document_loaders.excel import UnstructuredExcelLoader
 
 load_dotenv()
 
-def load_document():
-    loader = UnstructuredExcelLoader("base/base.xlsx")
-    return loader.load()
+class Assistente:
+    def __init__(self, message):
+        self.message = message
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        self.document = self.load_document()
+        self.embedes = OpenAIEmbeddings()
+        self.db = FAISS.from_documents(self.document, self.embedes)
+        self.llm = self.initialize_llm(self.openai_api_key)
 
-def retrieve_similar_responses(db, query, k=3):
-    similar_responses = db.similarity_search(query, k=k)
-    return [doc.page_content for doc in similar_responses]
+    def load_document(self):
+        loader = UnstructuredExcelLoader("base/base.xlsx")
+        return loader.load()
 
-def initialize_llm(openai_api_key):
-    return ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-16k-0613", temperature=0)
+    def retrieve_similar_responses(self, query, k=3):
+        similar_responses = self.db.similarity_search(query, k=k)
+        return [doc.page_content for doc in similar_responses]
 
-def generate_response(llm, message, best_practice):
-    response = llm.predict(message=message, best_practice=best_practice)
-    return response
+    def initialize_llm(self, openai_api_key):
+        return ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-16k-0613", temperature=0)
 
-def main():
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        st.error("Chave de API do OpenAI não configurada. Por favor, configure a variável de ambiente OPENAI_API_KEY.")
-        return
+    def generate_response(self, message):
+        response = self.llm.predict(text=message)
+        return response
 
-    document = load_document()
-    if not document:
-        st.error("Erro ao carregar o documento base.")
-        return
+    def main(self):
+        if not self.openai_api_key:
+            st.error("Chave de API do OpenAI não configurada. Por favor, configure a variável de ambiente OPENAI_API_KEY.")
+            return
 
-    embedes = OpenAIEmbeddings()
-    db = FAISS.from_documents(document, embedes)
+        if not self.document:
+            st.error("Erro ao carregar o documento base.")
+            return
 
-    llm = initialize_llm(openai_api_key)
+        template = """
+        Você é um assistente virtual que trabalha no setor de suporte ao cliente de um
+        software ERP chamado Simples Varejo.
 
-    template = """
-    Você é um assistente virtual que trabalha no setor de suporte ao cliente de um
-    software ERP chamado Simples Varejo.
+        Aqui está a mensagem com dúvida do cliente:
+        {message}
 
-    Aqui está a mensagem com dúvida do cliente:
-    {message}
+        Caso a resposta não seja encontrada na documentação passada, peça o cliente para entrar em contato com o suporte por telefone ou email.
 
-    Aqui está uma documentação para se basear na resposta:
-    {best_practice}
+        Responda em português a melhor resposta para o cliente.
+        """
+        prompt = PromptTemplate(
+            input_variables=["message"],
+            template=template,
+        )
 
-    Caso a resposta não seja encontrada na documentação passada, peça o cliente para entrar em contato com o suporte por telefone ou email.
+        chain = LLMChain(
+            llm=self.llm, prompt=prompt
+        )
 
-    Responda em português a melhor resposta para o cliente.
-    """
-    prompt = PromptTemplate(
-        input_variables=["message", "best_practice"],
-        template=template,
-    )
+        user_question = self.message
+        response = self.generate_response(user_question)
 
-    chain = LLMChain(
-        llm=llm, prompt=prompt
-    )
-
-    user_question = input("Olá, qual é a sua dúvida? ")
-    best_practice = retrieve_similar_responses(db, user_question)
-    response = generate_response(chain, user_question, best_practice)
-
-    print("-" * 100)
-    print(response)
-    print("-" * 100)
+        st.write(response)  # Escreve a resposta na interface Streamlit
 
 if __name__ == "__main__":
-    main()
+    st.title("Assistente Virtual")
+    user_question = st.text_input("Olá, qual é a sua dúvida?")
+    if user_question:
+        assistente = Assistente(user_question)
+        assistente.main()
