@@ -1,16 +1,11 @@
 import os
 import streamlit as st
 from langchain_community.vectorstores.faiss import FAISS
-# from langchain.vectorstores import FAISS
-# from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
-# from langchain_community.chat_models import ChatOpenAI
 from langchain_openai import ChatOpenAI
-# from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from dotenv import load_dotenv
-# from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from langchain_community.document_loaders.excel import UnstructuredExcelLoader
 
 load_dotenv()
