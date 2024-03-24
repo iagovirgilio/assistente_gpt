@@ -30,7 +30,9 @@ class Assistente:
         return ChatOpenAI(openai_api_key=openai_api_key, model_name="gpt-3.5-turbo-16k-0613", temperature=0)
 
     def generate_response(self, message):
-        response = self.llm.predict(text=message)
+        context = self.retrieve_similar_responses(message)
+        message_with_context = f"{message}\n\n{' '.join(context)}"
+        response = self.llm.predict(text=message_with_context)
         return response
 
     def main(self):
