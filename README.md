@@ -22,8 +22,8 @@ Este projeto consiste em um assistente virtual desenvolvido em Python que utiliz
 1. Clone este repositório:
 
 ```bash
-    git clone https://github.com/seu-usuario/assistente-de-suporte.git
-    cd assistente-de-suporte
+    git clone https://github.com/iagovirgilio/assistente_gpt.git
+    cd assistente_gpt
 ```
 
 2. Instale as dependências:
